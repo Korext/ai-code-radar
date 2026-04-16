@@ -1,0 +1,14 @@
+{
+  "name": "ai-code-radar-pipeline",
+  "version": "1.0.0",
+  "description": "Data aggregation pipeline for AI Code Radar.",
+  "scripts": {
+    "start": "node src/scheduler.js",
+    "aggregate": "node src/aggregator.js"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.0"
+  },
+  "author": "Korext <tombruno@korext.com>",
+  "license": "Apache-2.0"
+}
