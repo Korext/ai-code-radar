@@ -184,7 +184,7 @@ async function runAggregator() {
   console.log(`[radar] Aggregation started at ${now.toISOString()}`);
 
   // TODO: Replace SEED_DATA with real aggregation queries
-  // once the attestation registry passes 1000 entries.
+  // once the attestation registry passes 100 entries.
   const data = JSON.parse(JSON.stringify(SEED_DATA));
   data.computed_at = now.toISOString();
   data.data_coverage.latest_attestation = now.toISOString().split('T')[0];
