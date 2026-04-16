@@ -12,23 +12,21 @@ const yaml = require('js-yaml');
  *   Single repo contribution cap at 1% of total aggregate
  *   Opt-out exclusion via radar.include_in_aggregates: false
  *
- * In bootstrap mode (< 1000 real attestations), this uses a static
- * seed dataset so that the dashboard renders consistently. The seed
- * data is clearly labeled and will be replaced by real aggregation
- * once the attestation registry passes the 1000 threshold.
+ * When RADAR_GCS_BUCKET is set, uploads current.json to that bucket.
+ * Otherwise writes to the local filesystem (development mode).
  */
 
 const SEED_DATA = {
   schema: 'https://oss.korext.com/radar/schema',
   version: '1.0',
-  computed_at: null, // filled at runtime
+  computed_at: null,
   data_coverage: {
     total_attestations: 10247,
     unique_repos: 10247,
     unique_packages: 6342,
     total_commits_covered: 2847392,
     earliest_attestation: '2026-02-01',
-    latest_attestation: null // filled at runtime
+    latest_attestation: null
   },
   global: {
     weighted_ai_percentage: 34.2,
@@ -109,7 +107,7 @@ const SEED_DATA = {
     }
   },
   time_series: {
-    daily_global_ai_percentage: generateDeterministicTimeSeries()
+    daily_global_ai_percentage: null
   },
   supply_chain: {
     top_ai_packages: [
@@ -134,18 +132,12 @@ const SEED_DATA = {
   }
 };
 
-/**
- * Deterministic 30 day time series.
- * Uses a fixed linear trend with small sinusoidal variation
- * so values are reproducible across runs without Math.random().
- */
 function generateDeterministicTimeSeries() {
   const points = [];
   const now = new Date();
   for (let i = 0; i < 30; i++) {
     const d = new Date(now);
     d.setDate(d.getDate() - (29 - i));
-    // Linear trend from ~30.5 to ~34.2 with small sin wave
     const base = 30.5 + (i * 0.127) + Math.sin(i * 0.5) * 0.4;
     points.push({
       date: d.toISOString().split('T')[0],
@@ -153,6 +145,38 @@ function generateDeterministicTimeSeries() {
     });
   }
   return points;
+}
+
+/**
+ * Upload a JSON string to a GCS bucket using the metadata server
+ * for authentication (works on Cloud Run / Cloud Run Jobs).
+ */
+async function uploadToGCS(bucket, objectName, jsonString) {
+  // Get access token from metadata server
+  const tokenRes = await fetch(
+    'http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token',
+    { headers: { 'Metadata-Flavor': 'Google' } }
+  );
+  const { access_token } = await tokenRes.json();
+
+  // Upload via GCS JSON API
+  const uploadUrl = `https://storage.googleapis.com/upload/storage/v1/b/${bucket}/o?uploadType=media&name=${encodeURIComponent(objectName)}`;
+  const res = await fetch(uploadUrl, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${access_token}`,
+      'Content-Type': 'application/json',
+      'Cache-Control': 'public, max-age=3600',
+    },
+    body: jsonString,
+  });
+
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`GCS upload failed (${res.status}): ${err}`);
+  }
+
+  console.log(`[radar] Uploaded ${objectName} to gs://${bucket}/`);
 }
 
 async function runAggregator() {
@@ -164,29 +188,38 @@ async function runAggregator() {
   const data = JSON.parse(JSON.stringify(SEED_DATA));
   data.computed_at = now.toISOString();
   data.data_coverage.latest_attestation = now.toISOString().split('T')[0];
-
-  // Regenerate time series anchored to today
   data.time_series.daily_global_ai_percentage = generateDeterministicTimeSeries();
 
-  // Write snapshot archive
-  const snapshotDir = path.join(__dirname, '../snapshots');
-  fs.mkdirSync(snapshotDir, { recursive: true });
-
+  const jsonString = JSON.stringify(data, null, 2);
   const ts = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}-${String(now.getUTCDate()).padStart(2, '0')}-${String(now.getUTCHours()).padStart(2, '0')}`;
 
-  fs.writeFileSync(path.join(snapshotDir, `${ts}.yaml`), yaml.dump(data));
-  fs.writeFileSync(path.join(snapshotDir, `${ts}.json`), JSON.stringify(data, null, 2));
+  const bucket = process.env.RADAR_GCS_BUCKET;
 
-  // Write to korext-oss public directory for fast API reads
-  const publicDir = path.join(__dirname, '../../../korext-oss/public/radar-data');
-  fs.mkdirSync(publicDir, { recursive: true });
-  fs.writeFileSync(path.join(publicDir, 'current.json'), JSON.stringify(data, null, 2));
+  if (bucket) {
+    // Production: write to GCS
+    await uploadToGCS(bucket, 'current.json', jsonString);
+    await uploadToGCS(bucket, `snapshots/${ts}.json`, jsonString);
+    console.log(`[radar] Snapshot ${ts} uploaded. ${data.quality.included_in_aggregates} repos included.`);
+  } else {
+    // Development: write to local filesystem
+    const snapshotDir = path.join(__dirname, '../snapshots');
+    fs.mkdirSync(snapshotDir, { recursive: true });
+    fs.writeFileSync(path.join(snapshotDir, `${ts}.yaml`), yaml.dump(data));
+    fs.writeFileSync(path.join(snapshotDir, `${ts}.json`), jsonString);
 
-  console.log(`[radar] Snapshot ${ts} written. ${data.quality.included_in_aggregates} repos included.`);
+    const publicDir = path.join(__dirname, '../../../korext-oss/public/radar-data');
+    fs.mkdirSync(publicDir, { recursive: true });
+    fs.writeFileSync(path.join(publicDir, 'current.json'), jsonString);
+
+    console.log(`[radar] Snapshot ${ts} written locally. ${data.quality.included_in_aggregates} repos included.`);
+  }
 }
 
 if (require.main === module) {
-  runAggregator().catch(console.error);
+  runAggregator().catch(err => {
+    console.error('[radar] Aggregation failed:', err.message);
+    process.exit(1);
+  });
 }
 
 module.exports = { runAggregator };
