@@ -1,8 +1,14 @@
 {
   "name": "@korext/radar-data",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "SDK for querying the AI Code Radar public API.",
   "main": "index.js",
+  "homepage": "https://oss.korext.com/radar",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/korext/ai-code-radar.git",
+    "directory": "sdk-npm"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
