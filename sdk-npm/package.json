@@ -1,6 +1,6 @@
 {
   "name": "@korext/radar-data",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "SDK for querying the AI Code Radar public API.",
   "main": "index.js",
   "homepage": "https://oss.korext.com/radar",
@@ -12,7 +12,20 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["ai", "radar", "statistics", "data", "korext"],
+  "files": [
+    "index.js",
+    "LICENSE",
+    "LICENSE-SPEC",
+    "LICENSE-DATA",
+    "README.md"
+  ],
+  "keywords": [
+    "ai",
+    "radar",
+    "statistics",
+    "data",
+    "korext"
+  ],
   "author": "Korext <tombruno@korext.com>",
   "license": "Apache-2.0"
 }
