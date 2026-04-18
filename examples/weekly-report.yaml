@@ -1,0 +1,27 @@
+schema: https://oss.korext.com/radar/report-schema
+version: "1.0"
+report_id: "2026-W16"
+period:
+  start: 2026-04-14T00:00:00Z
+  end: 2026-04-20T23:59:59Z
+generated: 2026-04-21T01:00:00Z
+summary:
+  repos_scanned: 12847
+  new_repos_this_week: 342
+  global_ai_percentage: 24.7
+  global_ai_percentage_change: +0.8
+highlights:
+  - "TypeScript overtakes Python as highest AI adoption language (31.2% vs 28.4%)"
+  - "Claude Code grows 12% week over week, now in 890 repos"
+  - "Governance adoption reaches 33.8% (ATTESTED + SCANNED)"
+trends:
+  - metric: global_ai_percentage
+    values:
+      - week: "2026-W13"
+        value: 23.1
+      - week: "2026-W14"
+        value: 23.5
+      - week: "2026-W15"
+        value: 23.9
+      - week: "2026-W16"
+        value: 24.7

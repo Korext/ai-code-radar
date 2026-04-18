@@ -1,7 +1,8 @@
 {
-  "name": "ai-code-radar-pipeline",
+  "name": "@korext/ai-code-radar-pipeline",
   "version": "1.0.0",
-  "description": "Data aggregation pipeline for AI Code Radar.",
+  "private": true,
+  "description": "Aggregation pipeline for AI Code Radar. Not published to npm.",
   "scripts": {
     "start": "node src/scheduler.js",
     "aggregate": "node src/aggregator.js"
@@ -17,6 +18,11 @@
     "LICENSE-DATA",
     "README.md"
   ],
+  "homepage": "https://oss.korext.com/radar",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/korext/ai-code-radar"
+  },
   "author": "Korext <tombruno@korext.com>",
   "license": "Apache-2.0"
 }

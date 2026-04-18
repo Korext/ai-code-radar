@@ -1,0 +1,61 @@
+schema: https://oss.korext.com/radar/snapshot-schema
+version: "1.0"
+generated: 2026-04-15T00:00:00Z
+period: weekly
+repos_scanned: 12847
+global:
+  ai_assisted_percentage: 24.7
+  total_ai_commits: 318420
+  total_commits: 1289000
+by_language:
+  - language: TypeScript
+    repos: 3210
+    ai_percentage: 31.2
+  - language: Python
+    repos: 2890
+    ai_percentage: 28.4
+  - language: JavaScript
+    repos: 2100
+    ai_percentage: 26.1
+  - language: Go
+    repos: 890
+    ai_percentage: 19.3
+  - language: Rust
+    repos: 670
+    ai_percentage: 22.8
+  - language: Java
+    repos: 1200
+    ai_percentage: 15.6
+by_tool:
+  - tool: GitHub Copilot
+    repos: 8420
+    market_share: 65.5
+  - tool: Cursor
+    repos: 2100
+    market_share: 16.3
+  - tool: Claude Code
+    repos: 890
+    market_share: 6.9
+  - tool: Windsurf
+    repos: 450
+    market_share: 3.5
+  - tool: Codeium
+    repos: 380
+    market_share: 3.0
+by_ecosystem:
+  - ecosystem: npm
+    repos: 4200
+    ai_percentage: 29.1
+  - ecosystem: PyPI
+    repos: 2300
+    ai_percentage: 27.8
+  - ecosystem: Cargo
+    repos: 670
+    ai_percentage: 22.5
+  - ecosystem: Go Modules
+    repos: 890
+    ai_percentage: 19.0
+governance:
+  ATTESTED: 1240
+  SCANNED: 3100
+  UNGOVERNED: 8507
