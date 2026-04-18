@@ -9,6 +9,14 @@
   "dependencies": {
     "js-yaml": "^4.1.0"
   },
+  "files": [
+    "src/",
+    "sdk-npm/",
+    "LICENSE",
+    "LICENSE-SPEC",
+    "LICENSE-DATA",
+    "README.md"
+  ],
   "author": "Korext <tombruno@korext.com>",
   "license": "Apache-2.0"
 }
